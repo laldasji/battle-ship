@@ -1,0 +1,177 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --dark-red: rgb(214,20,20);
+    --mustard-yellow: rgb(249, 217, 35);
+    --light-grey: rgb(218, 218, 218);
+    --ocean-deep: rgb(64,106,201);
+}
+
+body {
+    height: 100dvh;
+    width: 100dvw;
+    display: grid;
+    grid-template-rows: 1fr 6fr 1fr;
+}
+
+#instructions {
+    h3 {
+        font-weight: 900;
+    }
+    align-self: center;
+    display: grid;
+    place-items: center;
+}
+
+#mapInitialiser {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    #battleGround {
+        width: calc(5rem + 60%);
+        aspect-ratio: 1 / 1;
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        grid-template-rows: repeat(10, 1fr);
+        background-color: black;
+        gap: 1px;
+        border: 1px solid black;
+        & div {
+            background-color: var(--ocean-deep);
+        }
+        .highlight {
+            background-color: var(--mustard-yellow);
+        }
+        .blocked {
+            background-color: var(--light-grey);
+        }
+    }
+    #dockyard {
+        border: 1px solid black;
+        display: grid;
+        place-items: center;
+        width: calc(5rem + 60%);
+        aspect-ratio: 1 / 1;
+        & > div {
+            display: grid;
+            gap: 1px;
+            background-color: black;
+            border: 1px solid black;
+            & > div {
+                width: 100%;
+                height: 100%;
+                background-color: var(--light-grey);
+            }
+        }
+
+        .placed {
+            pointer-events: none;
+            & > div {
+                background-color: black;
+            }
+        }
+        .ship {
+            /*area divided into 5 regions because 5 ships, we need half of each of 5 for 10% height */
+            height: 50%;
+        }
+        .shipVertical {
+            width: 50%;
+        }
+
+        #Destroyer.ship {
+            width: 20%;
+            height: 50%;
+            grid-template-columns: repeat(2, 1fr);
+        }
+        #Submarine.ship {
+            width: 30%;
+            height: 50%;
+            grid-template-columns: repeat(3, 1fr);
+        }
+        #Cruiser.ship {
+            width: 30%;
+            height: 50%;
+            grid-template-columns: repeat(3, 1fr);
+        }
+        #Battleship.ship {
+            width: 40%;
+            height: 50%;
+            grid-template-columns: repeat(4, 1fr);
+        }
+        #Carrier.ship {
+            width: 50%;
+            height: 50%;
+            grid-template-columns: repeat(5, 1fr);
+        }
+
+        #Destroyer.shipVertical {
+            height: 20%;
+            width: 50%;
+            grid-template-rows: repeat(2, 1fr);
+        }
+        #Submarine.shipVertical {
+            height: 30%;
+            width: 50%;
+            grid-template-rows: repeat(3, 1fr);
+        }
+        #Cruiser.shipVertical {
+            height: 30%;
+            width: 50%;
+            grid-template-rows: repeat(3, 1fr);
+        }
+        #Battleship.shipVertical {
+            height: 40%;
+            width: 50%;
+            grid-template-rows: repeat(4, 1fr);
+        }
+        #Carrier.shipVertical {
+            height: 50%;
+            width: 50%;
+            grid-template-rows: repeat(5, 1fr);
+        }
+    }
+    .horizontal {
+        grid-template-rows: repeat(5, 1fr);
+        grid-template-columns: 1fr;
+    }
+    .vertical {
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: 1fr;
+    }
+}
+
+#commandArea {
+    background-color: var(--dark-red);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    place-items: center;
+    button {
+        position: relative;
+        padding: 1em;
+        font-size: 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        background-color: white;
+        box-shadow: 0.4rem 0.4rem 0 black;
+    }
+    button:active {
+        top: 0.3rem;
+        left: 0.3rem;
+        box-shadow: 0.2rem 0.2rem 0 black;
+    }
+    .unclickable {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+    #undoLastPlacement {
+        grid-column: 2 / 3;
+    }
+    #startGame {
+        grid-column: 3 / 4;
+    }
+}
