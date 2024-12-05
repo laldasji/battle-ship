@@ -1,0 +1,64 @@
+#gameTitle {
+    text-align: center;
+}
+
+#versusArea {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+}
+
+.mapArea {
+    width: calc(5rem + 60%);
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    background-color: black;
+    gap: 1px;
+    border: 1px solid black;
+    .highlight {
+        background-color: var(--mustard-yellow);
+    }
+    .blocked {
+        background-color: var(--light-grey);
+    }
+}
+
+#playerBattleGround {
+    & div {
+        background-color: var(--ocean-deep);
+    }
+}
+
+#CPUBattleGround {
+    & div {
+        background-color: white;
+        object-fit: contain;
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+    }
+}
+#scoreCard {
+    display: grid;
+    place-items: center;
+    grid-template-columns: 1fr 1fr;
+    background-color: var(--dark-red);
+    color: white;
+    position: relative;
+    & div {
+        text-align: center;
+    }
+    #turnIndicator {
+        box-shadow: 0 0 1em 1.25em var(--ocean-deep);
+        background-color: var(--ocean-deep);
+        font-weight: 900;
+        position: fixed;
+    }
+}

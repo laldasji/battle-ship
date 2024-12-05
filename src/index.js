@@ -1,7 +1,18 @@
-import './normalise.css';
+import './normalise.css'
 import './typography.css'
-import './style.css';
+import './shipPlacementStyle.css'
+import './battleGroundStyle.css'
 import { gameloop } from './gameLoop';
+
+class Ship {
+    constructor(length, name) {
+        this.name = name;
+        this.length = length;
+        this.placed = false;
+        this.cell = [-1, -1];
+        this.alignment = -1;
+    }
+}
 
 const dockyard = document.querySelector('#dockyard');
 const shipList = document.querySelectorAll('div[draggable="true"]');
@@ -25,22 +36,9 @@ battleGround.addEventListener("dragover", (event) => {
     isInsideMap = true;
 });
 
-
 battleGround.addEventListener("dragleave", () => {
     isInsideMap = false;
 });
-
-
-
-class Ship {
-    constructor(length, name) {
-        this.name = name;
-        this.length = length;
-        this.placed = false;
-        this.cell = [-1, -1];
-        this.alignment = -1;
-    }
-}
 
 const Ships = {
     Destroyer: new Ship(2, 'Destroyer'),
@@ -256,3 +254,5 @@ startGame.addEventListener('click', () => {
         gameloop();
     }
 })
+
+// gameloop();

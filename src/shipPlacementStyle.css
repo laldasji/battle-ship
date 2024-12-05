@@ -14,7 +14,7 @@ body {
     height: 100dvh;
     width: 100dvw;
     display: grid;
-    grid-template-rows: 1fr 6fr 1fr;
+    grid-template-rows: 0.75fr 6fr 1fr;
 }
 
 #instructions {
