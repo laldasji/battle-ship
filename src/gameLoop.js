@@ -1,117 +1,225 @@
 const body = document.querySelector('body');
 
-function startGame() {
+import hit from './hit.png'
+import cross from './cross.svg'
+import crosshair from './crosshair.svg'
+import { ShipsTemplate, isValid } from './shipPlacement'
+import hitTargetSound from './gunshot.mp3';
+import missTargetSound from './miss.mp3';
+
+const hitTarget = new Audio(hitTargetSound);
+const missTarget = new Audio(missTargetSound);
+
+function getRandomInt(a, b) {
+    return Math.floor(Math.random() * (b - a + 1)) + a;
+}
+
+function generateCPUMap(abortSignal) {
+    // let Ships = ShipsTemplate;
+    let Ships = JSON.parse(JSON.stringify(ShipsTemplate));
+
+    let CPUGameBoard = Array.from({ length: 10 }, () => Array(10).fill(-1));
+    let CPUShipsPlaced = [];
+    let idx = 1;
+
+    for (let ship in Ships) {
+        const alignment = getRandomInt(0, 1);
+        const upperLimit = 9 - Ships[ship].length + 1;
+        let cell = [-1, -1];
+
+        while (true) {
+            if (abortSignal.aborted) return null;
+            let tempCell = [-1, -1];
+            if (alignment == 0) {
+                tempCell = [getRandomInt(0, 9), getRandomInt(0, upperLimit)];
+            } else {
+                tempCell = [getRandomInt(0, upperLimit), getRandomInt(0, 9)];
+            }
+            if (isValid(ship, tempCell, alignment, CPUGameBoard)) {
+                // fill up CPUGameBoard
+                if (alignment == 0) {
+                    for (let i = 0; i < Ships[ship].length; i++) {
+                        CPUGameBoard[tempCell[0]][tempCell[1] + i] = idx;
+                    }
+                } else {
+                    for (let i = 0; i < Ships[ship].length; i++) {
+                        CPUGameBoard[tempCell[0] + i][tempCell[1]] = idx;
+                    }
+                }
+                // add to CPUShipsPlaced
+                Ships[ship].alignment = alignment;
+                Ships[ship].cell = tempCell;
+                CPUShipsPlaced.push(Ships[ship]);
+
+                idx++;
+                break;
+            }
+        }
+    }
+    return { CPUShipsPlaced, CPUGameBoard };
+}
+
+async function generateCPUMapWithTimeout() {
+    async function withTimeout(fn, timeout) {
+        const abortController = new AbortController();
+        const { signal } = abortController;
+
+        const promise = new Promise((resolve) => {
+            const result = fn(signal);
+            resolve(result);
+        });
+
+        // Race between the timeout and the function completion
+        return Promise.race([
+            promise.then((result) => {
+                if (result) return result; // Valid result returned
+            }),
+            new Promise((resolve) => {
+                setTimeout(() => {
+                    abortController.abort(); // Abort the operation
+                    resolve("timeout");
+                }, timeout);
+            }),
+        ]);
+    }
+
+    while (true) {
+        const result = await withTimeout(generateCPUMap, 1000);
+
+        if (result !== "timeout" && result !== null) {
+            console.log("CPU Map successfully generated.");
+            return result;
+        } else {
+            console.log("generateCPUMap took too long, retrying...");
+        }
+    }
+}
+
+function updateShipsRemaining(isPlayer, shipsRemaining) {
+    const newVal = document.createElement('h5');
+    let elementToUpdate;
+    if (isPlayer) {
+        elementToUpdate = document.querySelector('#playerShipsRemaining');
+        newVal.innerHTML = `Player Ships <br> Remaining: ${shipsRemaining}`;
+    } else {
+        elementToUpdate = document.querySelector('#CPUShipsRemaining');
+        newVal.innerHTML = `CPU Ships <br> Remaining: ${shipsRemaining}`;
+    }
+    elementToUpdate.innerHTML = '';
+    elementToUpdate.appendChild(newVal);
+}
+
+async function startGame(shipsPlaced) {
     body.innerHTML = `
-        <h1 id="gameTitle">-BATTLESHIP!-</h1>
+    <div id="alert" style="display: none;"></div>
+    <h2 id="gameTitle">-BATTLESHIP!-</h2>
     <div id="versusArea">
         <div class="mapArea" id="playerBattleGround">
-            <div class="playerCell" id="0"></div>
-            <div class="playerCell" id="1"></div>
-            <div class="playerCell" id="2"></div>
-            <div class="playerCell" id="3"></div>
-            <div class="playerCell" id="4"></div>
-            <div class="playerCell" id="5"></div>
-            <div class="playerCell" id="6"></div>
-            <div class="playerCell" id="7"></div>
-            <div class="playerCell" id="8"></div>
-            <div class="playerCell" id="9"></div>
-            <div class="playerCell" id="10"></div>
-            <div class="playerCell" id="11"></div>
-            <div class="playerCell" id="12"></div>
-            <div class="playerCell" id="13"></div>
-            <div class="playerCell" id="14"></div>
-            <div class="playerCell" id="15"></div>
-            <div class="playerCell" id="16"></div>
-            <div class="playerCell" id="17"></div>
-            <div class="playerCell" id="18"></div>
-            <div class="playerCell" id="19"></div>
-            <div class="playerCell" id="20"></div>
-            <div class="playerCell" id="21"></div>
-            <div class="playerCell" id="22"></div>
-            <div class="playerCell" id="23"></div>
-            <div class="playerCell" id="24"></div>
-            <div class="playerCell" id="25"></div>
-            <div class="playerCell" id="26"></div>
-            <div class="playerCell" id="27"></div>
-            <div class="playerCell" id="28"></div>
-            <div class="playerCell" id="29"></div>
-            <div class="playerCell" id="30"></div>
-            <div class="playerCell" id="31"></div>
-            <div class="playerCell" id="32"></div>
-            <div class="playerCell" id="33"></div>
-            <div class="playerCell" id="34"></div>
-            <div class="playerCell" id="35"></div>
-            <div class="playerCell" id="36"></div>
-            <div class="playerCell" id="37"></div>
-            <div class="playerCell" id="38"></div>
-            <div class="playerCell" id="39"></div>
-            <div class="playerCell" id="40"></div>
-            <div class="playerCell" id="41"></div>
-            <div class="playerCell" id="42"></div>
-            <div class="playerCell" id="43"></div>
-            <div class="playerCell" id="44"></div>
-            <div class="playerCell" id="45"></div>
-            <div class="playerCell" id="46"></div>
-            <div class="playerCell" id="47"></div>
-            <div class="playerCell" id="48"></div>
-            <div class="playerCell" id="49"></div>
-            <div class="playerCell" id="50"></div>
-            <div class="playerCell" id="51"></div>
-            <div class="playerCell" id="52"></div>
-            <div class="playerCell" id="53"></div>
-            <div class="playerCell" id="54"></div>
-            <div class="playerCell" id="55"></div>
-            <div class="playerCell" id="56"></div>
-            <div class="playerCell" id="57"></div>
-            <div class="playerCell" id="58"></div>
-            <div class="playerCell" id="59"></div>
-            <div class="playerCell" id="60"></div>
-            <div class="playerCell" id="61"></div>
-            <div class="playerCell" id="62"></div>
-            <div class="playerCell" id="63"></div>
-            <div class="playerCell" id="64"></div>
-            <div class="playerCell" id="65"></div>
-            <div class="playerCell" id="66"></div>
-            <div class="playerCell" id="67"></div>
-            <div class="playerCell" id="68"></div>
-            <div class="playerCell" id="69"></div>
-            <div class="playerCell" id="70"></div>
-            <div class="playerCell" id="71"></div>
-            <div class="playerCell" id="72"></div>
-            <div class="playerCell" id="73"></div>
-            <div class="playerCell" id="74"></div>
-            <div class="playerCell" id="75"></div>
-            <div class="playerCell" id="76"></div>
-            <div class="playerCell" id="77"></div>
-            <div class="playerCell" id="78"></div>
-            <div class="playerCell" id="79"></div>
-            <div class="playerCell" id="80"></div>
-            <div class="playerCell" id="81"></div>
-            <div class="playerCell" id="82"></div>
-            <div class="playerCell" id="83"></div>
-            <div class="playerCell" id="84"></div>
-            <div class="playerCell" id="85"></div>
-            <div class="playerCell" id="86"></div>
-            <div class="playerCell" id="87"></div>
-            <div class="playerCell" id="88"></div>
-            <div class="playerCell" id="89"></div>
-            <div class="playerCell" id="90"></div>
-            <div class="playerCell" id="91"></div>
-            <div class="playerCell" id="92"></div>
-            <div class="playerCell" id="93"></div>
-            <div class="playerCell" id="94"></div>
-            <div class="playerCell" id="95"></div>
-            <div class="playerCell" id="96"></div>
-            <div class="playerCell" id="97"></div>
-            <div class="playerCell" id="98"></div>
-            <div class="playerCell" id="99"></div>
+            <div class="playerCell" id="p0"></div>
+            <div class="playerCell" id="p1"></div>
+            <div class="playerCell" id="p2"></div>
+            <div class="playerCell" id="p3"></div>
+            <div class="playerCell" id="p4"></div>
+            <div class="playerCell" id="p5"></div>
+            <div class="playerCell" id="p6"></div>
+            <div class="playerCell" id="p7"></div>
+            <div class="playerCell" id="p8"></div>
+            <div class="playerCell" id="p9"></div>
+            <div class="playerCell" id="p10"></div>
+            <div class="playerCell" id="p11"></div>
+            <div class="playerCell" id="p12"></div>
+            <div class="playerCell" id="p13"></div>
+            <div class="playerCell" id="p14"></div>
+            <div class="playerCell" id="p15"></div>
+            <div class="playerCell" id="p16"></div>
+            <div class="playerCell" id="p17"></div>
+            <div class="playerCell" id="p18"></div>
+            <div class="playerCell" id="p19"></div>
+            <div class="playerCell" id="p20"></div>
+            <div class="playerCell" id="p21"></div>
+            <div class="playerCell" id="p22"></div>
+            <div class="playerCell" id="p23"></div>
+            <div class="playerCell" id="p24"></div>
+            <div class="playerCell" id="p25"></div>
+            <div class="playerCell" id="p26"></div>
+            <div class="playerCell" id="p27"></div>
+            <div class="playerCell" id="p28"></div>
+            <div class="playerCell" id="p29"></div>
+            <div class="playerCell" id="p30"></div>
+            <div class="playerCell" id="p31"></div>
+            <div class="playerCell" id="p32"></div>
+            <div class="playerCell" id="p33"></div>
+            <div class="playerCell" id="p34"></div>
+            <div class="playerCell" id="p35"></div>
+            <div class="playerCell" id="p36"></div>
+            <div class="playerCell" id="p37"></div>
+            <div class="playerCell" id="p38"></div>
+            <div class="playerCell" id="p39"></div>
+            <div class="playerCell" id="p40"></div>
+            <div class="playerCell" id="p41"></div>
+            <div class="playerCell" id="p42"></div>
+            <div class="playerCell" id="p43"></div>
+            <div class="playerCell" id="p44"></div>
+            <div class="playerCell" id="p45"></div>
+            <div class="playerCell" id="p46"></div>
+            <div class="playerCell" id="p47"></div>
+            <div class="playerCell" id="p48"></div>
+            <div class="playerCell" id="p49"></div>
+            <div class="playerCell" id="p50"></div>
+            <div class="playerCell" id="p51"></div>
+            <div class="playerCell" id="p52"></div>
+            <div class="playerCell" id="p53"></div>
+            <div class="playerCell" id="p54"></div>
+            <div class="playerCell" id="p55"></div>
+            <div class="playerCell" id="p56"></div>
+            <div class="playerCell" id="p57"></div>
+            <div class="playerCell" id="p58"></div>
+            <div class="playerCell" id="p59"></div>
+            <div class="playerCell" id="p60"></div>
+            <div class="playerCell" id="p61"></div>
+            <div class="playerCell" id="p62"></div>
+            <div class="playerCell" id="p63"></div>
+            <div class="playerCell" id="p64"></div>
+            <div class="playerCell" id="p65"></div>
+            <div class="playerCell" id="p66"></div>
+            <div class="playerCell" id="p67"></div>
+            <div class="playerCell" id="p68"></div>
+            <div class="playerCell" id="p69"></div>
+            <div class="playerCell" id="p70"></div>
+            <div class="playerCell" id="p71"></div>
+            <div class="playerCell" id="p72"></div>
+            <div class="playerCell" id="p73"></div>
+            <div class="playerCell" id="p74"></div>
+            <div class="playerCell" id="p75"></div>
+            <div class="playerCell" id="p76"></div>
+            <div class="playerCell" id="p77"></div>
+            <div class="playerCell" id="p78"></div>
+            <div class="playerCell" id="p79"></div>
+            <div class="playerCell" id="p80"></div>
+            <div class="playerCell" id="p81"></div>
+            <div class="playerCell" id="p82"></div>
+            <div class="playerCell" id="p83"></div>
+            <div class="playerCell" id="p84"></div>
+            <div class="playerCell" id="p85"></div>
+            <div class="playerCell" id="p86"></div>
+            <div class="playerCell" id="p87"></div>
+            <div class="playerCell" id="p88"></div>
+            <div class="playerCell" id="p89"></div>
+            <div class="playerCell" id="p90"></div>
+            <div class="playerCell" id="p91"></div>
+            <div class="playerCell" id="p92"></div>
+            <div class="playerCell" id="p93"></div>
+            <div class="playerCell" id="p94"></div>
+            <div class="playerCell" id="p95"></div>
+            <div class="playerCell" id="p96"></div>
+            <div class="playerCell" id="p97"></div>
+            <div class="playerCell" id="p98"></div>
+            <div class="playerCell" id="p99"></div>
         </div>
         <div class="mapArea" id="CPUBattleGround">
-            <div class="CPUCELL" id="0">
-                <img src="./hit.png" alt="">
-            </div>
-            <div class="CPUCell" id="1"><img src="cross.svg" alt=""></div>
-            <div class="CPUCell" id="2"><img src="./crosshair.svg" alt=""></div>
+            <div class="CPUCell" id="0"></div>
+            <div class="CPUCell" id="1"></div>
+            <div class="CPUCell" id="2"></div>
             <div class="CPUCell" id="3"></div>
             <div class="CPUCell" id="4"></div>
             <div class="CPUCell" id="5"></div>
@@ -212,13 +320,119 @@ function startGame() {
         </div>
     </div>
     <div id="scoreCard">
-        <div id="playerShipsRemaining"><h5>Player Ships <br> Remaining: 0</h5></div>
-        <div id="CPUShipsRemaining"><h5>CPU Ships <br> Remaining: 0</h5></div>
+        <div id="playerShipsRemaining"><h5>Player Ships <br> Remaining: 5</h5></div>
+        <div id="CPUShipsRemaining"><h5>CPU Ships <br> Remaining: 5</h5></div>
         <div id="turnIndicator">
             <h4>YOUR TURN!</h4>
         </div>
     </div>
     `;
+    const playerMap = document.querySelectorAll('.playerCell');
+    let playerGameBoard = Array.from({ length: 10 }, () => Array(10).fill(-1));
+
+    const alert = document.querySelector('#alert');
+    function giveAlert(message) {
+        alert.classList.add('easeIn');
+        alert.style = '';
+
+        const alertMessage = document.createElement('h1')
+        alertMessage.textContent = message;
+        alert.innerHTML = '';
+        alert.appendChild(alertMessage);
+
+        setTimeout(() => {
+            alert.classList.remove('easeIn');
+            alert.classList.add('easeOut');
+            setTimeout(() => { alert.style.display = 'none'; alert.classList.remove('easeOut') }, 1000);
+
+        }, 2000);
+    }
+
+    let CPUShipsRemaining = 5;
+    let playerShipsRemaining = 5;
+
+    // place ships from previous step
+    for (let i = 0; i < shipsPlaced.length; i++) {
+        let currentShip = shipsPlaced[i];
+        if (currentShip.alignment == 0) {
+            for (let j = 0; j < currentShip.length; j++) {
+                playerMap[currentShip.cell[0] * 10 + currentShip.cell[1] + j].classList.add('blocked');
+                playerGameBoard[currentShip.cell[0]][currentShip.cell[1] + j] = i + 1;
+            }
+        } else {
+            for (let j = 0; j < currentShip.length; j++) {
+                playerMap[(currentShip.cell[0] + j) * 10 + currentShip.cell[1]].classList.add('blocked');
+                playerGameBoard[currentShip.cell[0] + j][currentShip.cell[1]] = i + 1;
+            }
+        }
+    }
+
+    const CPUMap = document.querySelectorAll('.CPUCell');
+
+    function sinkShip(currentShip) {
+        const length = ShipsTemplate[currentShip.name].length;
+        const x = currentShip.cell[0];
+        const y = currentShip.cell[1];
+        if (currentShip.alignment == 0) {
+            for (let j = 0; j < length; j++)
+                CPUMap[(x * 10) + y + j].classList.add('sunk');
+        } else {
+            for (let j = 0; j < length; j++)
+                CPUMap[((x + j) * 10) + y].classList.add('sunk');
+        }
+    }
+
+    for (let i = 0; i < CPUMap.length; i++) {
+        const cell = CPUMap[i];
+        const crosshairImage = document.createElement('img');
+        crosshairImage.src = crosshair;
+        let x = Math.floor(Number(cell.id) / 10);
+        let y = Number(cell.id)%10;
+
+        cell.addEventListener('mouseenter', () => {
+            cell.appendChild(crosshairImage);
+        })
+        cell.addEventListener('mouseleave', () => {
+            cell.removeChild(crosshairImage);
+        })
+        cell.addEventListener('click', () => {
+            const img = document.createElement('img')
+            if (CPUGameBoard[x][y] >= 1) {
+                img.src = hit;
+                hitTarget.currentTime = 0;
+                hitTarget.play();
+
+                // update gameBoard and change the value of "length" in the CPUShipsPlaced object
+                console.log(CPUShipsPlaced[CPUGameBoard[x][y] - 1].name);
+                CPUShipsPlaced[CPUGameBoard[x][y] - 1].length--;
+
+                // ship sinks
+                if (CPUShipsPlaced[CPUGameBoard[x][y] - 1].length == 0) {
+                    CPUShipsRemaining--;
+                    updateShipsRemaining(false, CPUShipsRemaining);
+                    sinkShip(CPUShipsPlaced[CPUGameBoard[x][y] - 1]);
+                    giveAlert(`You sank the ${CPUShipsPlaced[CPUGameBoard[x][y] - 1].name}!`);
+
+                    if (CPUShipsRemaining == 0) {
+                        // gameOVER!
+                    }
+                }
+                
+                CPUGameBoard[x][y] = -1;
+
+            } else {
+                img.src = cross;
+                missTarget.currentTime = 0;
+                missTarget.play();
+            }
+            cell.appendChild(img);
+            cell.classList.add('unclickable');
+        })
+    }
+
+    // randomly generate state for CPU
+    const { CPUShipsPlaced, CPUGameBoard } = await generateCPUMapWithTimeout();
+    console.log(CPUGameBoard);
 }
 
 export { startGame as gameloop};
