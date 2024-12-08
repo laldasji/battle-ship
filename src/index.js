@@ -261,6 +261,6 @@ let temp = [
     }
 ]
 
-gameloop(temp);
+// gameloop(temp);
 
-// initialiseMap();
+initialiseMap();
