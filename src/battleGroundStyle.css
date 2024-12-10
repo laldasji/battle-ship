@@ -73,6 +73,19 @@
 #playerBattleGround {
     & div {
         background-color: var(--ocean-deep);
+        object-fit: contain;
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        img {
+            position: absolute;
+            max-width: 90%;
+            max-height: 90%;
+        }
+    }
+    .playerCell {
+        position: relative;
     }
 }
 
@@ -100,6 +113,7 @@
         background-color: var(--dark-red);
     }
 }
+
 #scoreCard {
     display: grid;
     place-items: center;
@@ -109,11 +123,5 @@
     position: relative;
     & div {
         text-align: center;
-    }
-    #turnIndicator {
-        box-shadow: 0 0 1em 1.25em var(--ocean-deep);
-        background-color: var(--ocean-deep);
-        font-weight: 900;
-        position: fixed;
     }
 }

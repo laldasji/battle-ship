@@ -7,6 +7,9 @@ import { ShipsTemplate, isValid } from './shipPlacement'
 import hitTargetSound from './gunshot.mp3';
 import missTargetSound from './miss.mp3';
 
+import initialiseMap from '.';
+import { setPreviousHit, setPreviousSink, bestMove } from './CPUAI';
+
 const hitTarget = new Audio(hitTargetSound);
 const missTarget = new Audio(missTargetSound);
 
@@ -14,7 +17,7 @@ function getRandomInt(a, b) {
     return Math.floor(Math.random() * (b - a + 1)) + a;
 }
 
-function generateCPUMap(abortSignal) {
+function generateCPUMap() {
     // let Ships = ShipsTemplate;
     let Ships = JSON.parse(JSON.stringify(ShipsTemplate));
 
@@ -28,7 +31,6 @@ function generateCPUMap(abortSignal) {
         let cell = [-1, -1];
 
         while (true) {
-            if (abortSignal.aborted) return null;
             let tempCell = [-1, -1];
             if (alignment == 0) {
                 tempCell = [getRandomInt(0, 9), getRandomInt(0, upperLimit)];
@@ -59,42 +61,6 @@ function generateCPUMap(abortSignal) {
     return { CPUShipsPlaced, CPUGameBoard };
 }
 
-async function generateCPUMapWithTimeout() {
-    async function withTimeout(fn, timeout) {
-        const abortController = new AbortController();
-        const { signal } = abortController;
-
-        const promise = new Promise((resolve) => {
-            const result = fn(signal);
-            resolve(result);
-        });
-
-        // Race between the timeout and the function completion
-        return Promise.race([
-            promise.then((result) => {
-                if (result) return result; // Valid result returned
-            }),
-            new Promise((resolve) => {
-                setTimeout(() => {
-                    abortController.abort(); // Abort the operation
-                    resolve("timeout");
-                }, timeout);
-            }),
-        ]);
-    }
-
-    while (true) {
-        const result = await withTimeout(generateCPUMap, 1000);
-
-        if (result !== "timeout" && result !== null) {
-            console.log("CPU Map successfully generated.");
-            return result;
-        } else {
-            console.log("generateCPUMap took too long, retrying...");
-        }
-    }
-}
-
 function updateShipsRemaining(isPlayer, shipsRemaining) {
     const newVal = document.createElement('h5');
     let elementToUpdate;
@@ -109,7 +75,7 @@ function updateShipsRemaining(isPlayer, shipsRemaining) {
     elementToUpdate.appendChild(newVal);
 }
 
-async function startGame(shipsPlaced) {
+async function startGame(shipsPlaced, initialisationHTML) {
     body.innerHTML = `
     <div id="alert" style="display: none;"></div>
     <h2 id="gameTitle">-BATTLESHIP!-</h2>
@@ -322,15 +288,13 @@ async function startGame(shipsPlaced) {
     <div id="scoreCard">
         <div id="playerShipsRemaining"><h5>Player Ships <br> Remaining: 5</h5></div>
         <div id="CPUShipsRemaining"><h5>CPU Ships <br> Remaining: 5</h5></div>
-        <div id="turnIndicator">
-            <h4>YOUR TURN!</h4>
-        </div>
     </div>
     `;
     const playerMap = document.querySelectorAll('.playerCell');
     let playerGameBoard = Array.from({ length: 10 }, () => Array(10).fill(-1));
 
     const alert = document.querySelector('#alert');
+
     function giveAlert(message) {
         alert.classList.add('easeIn');
         alert.style = '';
@@ -346,6 +310,25 @@ async function startGame(shipsPlaced) {
             setTimeout(() => { alert.style.display = 'none'; alert.classList.remove('easeOut') }, 1000);
 
         }, 2000);
+    }
+
+    function endGame(message) {
+        alert.classList.add('easeIn');
+        alert.style = '';
+
+        const alertMessage = document.createElement('h1');
+        alertMessage.textContent = message;
+        alert.innerHTML = '';
+        alert.appendChild(alertMessage);
+        const newGame = document.createElement('button');
+        newGame.textContent = 'New Game';
+        newGame.addEventListener('click', () => {
+            body.innerHTML = initialisationHTML;
+            initialiseMap();
+        });
+        alert.appendChild(newGame);
+
+        setTimeout(alert.classList.remove('easeIn'), 1000);
     }
 
     let CPUShipsRemaining = 5;
@@ -369,17 +352,53 @@ async function startGame(shipsPlaced) {
 
     const CPUMap = document.querySelectorAll('.CPUCell');
 
-    function sinkShip(currentShip) {
+    function sinkShip(currentShip, entityMap) {
         const length = ShipsTemplate[currentShip.name].length;
         const x = currentShip.cell[0];
         const y = currentShip.cell[1];
         if (currentShip.alignment == 0) {
             for (let j = 0; j < length; j++)
-                CPUMap[(x * 10) + y + j].classList.add('sunk');
+                entityMap[(x * 10) + y + j].classList.add('sunk');
         } else {
             for (let j = 0; j < length; j++)
-                CPUMap[((x + j) * 10) + y].classList.add('sunk');
+                entityMap[((x + j) * 10) + y].classList.add('sunk');
         }
+    }
+
+    function playCPU() {
+        const img = document.createElement('img');
+        let [x, y] = bestMove();
+        if (playerGameBoard[x][y] >= 1) {
+            setPreviousHit(true);
+            img.src = hit;
+            hitTarget.currentTime = 0;
+            hitTarget.play();
+
+            shipsPlaced[playerGameBoard[x][y] - 1].length--;
+
+            if (shipsPlaced[playerGameBoard[x][y] - 1].length == 0) {
+                playerShipsRemaining--;
+                setPreviousSink(true);
+                updateShipsRemaining(true, playerShipsRemaining);
+                sinkShip(shipsPlaced[playerGameBoard[x][y] - 1], playerMap);
+
+                if (playerShipsRemaining == 0) {
+                    endGame(`You Lose...`);
+                } else {
+                    giveAlert(`You lost the ${shipsPlaced[playerGameBoard[x][y] - 1].name}!`);
+                }
+            }
+            playerGameBoard[x][y] = -1;
+            setTimeout(playCPU(), 1000);
+        } else {
+            setPreviousHit(false);
+            img.src = cross;
+            missTarget.currentTime = 0;
+            missTarget.play();
+        }
+
+        const thisCell = playerMap[x * 10 + y];
+        thisCell.appendChild(img);
     }
 
     for (let i = 0; i < CPUMap.length; i++) {
@@ -403,27 +422,29 @@ async function startGame(shipsPlaced) {
                 hitTarget.play();
 
                 // update gameBoard and change the value of "length" in the CPUShipsPlaced object
-                console.log(CPUShipsPlaced[CPUGameBoard[x][y] - 1].name);
+                // console.log(CPUShipsPlaced[CPUGameBoard[x][y] - 1].name);
                 CPUShipsPlaced[CPUGameBoard[x][y] - 1].length--;
 
                 // ship sinks
                 if (CPUShipsPlaced[CPUGameBoard[x][y] - 1].length == 0) {
                     CPUShipsRemaining--;
                     updateShipsRemaining(false, CPUShipsRemaining);
-                    sinkShip(CPUShipsPlaced[CPUGameBoard[x][y] - 1]);
-                    giveAlert(`You sank the ${CPUShipsPlaced[CPUGameBoard[x][y] - 1].name}!`);
-
+                    sinkShip(CPUShipsPlaced[CPUGameBoard[x][y] - 1], CPUMap);
+                    
                     if (CPUShipsRemaining == 0) {
-                        // gameOVER!
+                        endGame(`You win!`);
+                    } else {
+                        giveAlert(`You sank the ${CPUShipsPlaced[CPUGameBoard[x][y] - 1].name}!`);
                     }
                 }
-                
+
                 CPUGameBoard[x][y] = -1;
 
             } else {
                 img.src = cross;
                 missTarget.currentTime = 0;
                 missTarget.play();
+                setTimeout(playCPU(), 1000);
             }
             cell.appendChild(img);
             cell.classList.add('unclickable');
@@ -431,7 +452,7 @@ async function startGame(shipsPlaced) {
     }
 
     // randomly generate state for CPU
-    const { CPUShipsPlaced, CPUGameBoard } = await generateCPUMapWithTimeout();
+    const { CPUShipsPlaced, CPUGameBoard } = await generateCPUMap();
     console.log(CPUGameBoard);
 }
 

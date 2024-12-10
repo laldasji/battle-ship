@@ -5,6 +5,7 @@ import './battleGroundStyle.css'
 import { gameloop } from './gameLoop';
 
 import { ShipsTemplate, isValid } from './shipPlacement'
+const initialisationHTML = document.querySelector('body').innerHTML;
 
 
 function initialiseMap() {
@@ -34,7 +35,7 @@ function initialiseMap() {
         isInsideMap = false;
     });
 
-    const Ships = ShipsTemplate;
+    const Ships = JSON.parse(JSON.stringify(ShipsTemplate));
 
     function blockCells(toBlock) {
         for (let i = 0; i < toBlock.length; i++) {
@@ -198,24 +199,35 @@ function initialiseMap() {
 
     startGame.addEventListener('click', () => {
         if (shipsPlaced.length == 5) {
-            console.log(shipsPlaced);
             document.removeEventListener('keydown', handleRotation);
-            gameloop(shipsPlaced);
+            console.log(shipsPlaced)
+            setTimeout(() => {gameloop(shipsPlaced, initialisationHTML)}, 500);
         }
     })
 
     document.addEventListener('keydown', handleRotation);
 }
 
+export default initialiseMap;
 
 let temp = [
     {
-        "name": "Destroyer",
-        "length": 2,
+        "name": "Battleship",
+        "length": 4,
         "placed": true,
         "cell": [
-            1,
-            1
+            6,
+            0
+        ],
+        "alignment": 0
+    },
+    {
+        "name": "Cruiser",
+        "length": 3,
+        "placed": true,
+        "cell": [
+            4,
+            0
         ],
         "alignment": 0
     },
@@ -224,43 +236,31 @@ let temp = [
         "length": 3,
         "placed": true,
         "cell": [
-            1,
-            4
-        ],
-        "alignment": 1
-    },
-    {
-        "name": "Cruiser",
-        "length": 3,
-        "placed": true,
-        "cell": [
-            8,
-            1
+            2,
+            0
         ],
         "alignment": 0
     },
     {
-        "name": "Battleship",
-        "length": 4,
+        "name": "Destroyer",
+        "length": 2,
         "placed": true,
         "cell": [
-            1,
-            7
+            0,
+            0
         ],
-        "alignment": 1
+        "alignment": 0
     },
     {
         "name": "Carrier",
         "length": 5,
         "placed": true,
         "cell": [
-            6,
-            4
+            8,
+            0
         ],
         "alignment": 0
     }
 ]
-
-// gameloop(temp);
 
 initialiseMap();
