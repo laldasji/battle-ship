@@ -20,7 +20,7 @@ function getRandomCell() {
     do {
         x = Math.floor(Math.random() * 10);
         y = Math.floor(Math.random() * 10);
-    } while (cpuHitList[x][y]);
+    } while (cpuHitList[x][y] || (x + y)%2 == 0);
     return [x, y];
 }
 
@@ -38,7 +38,7 @@ function blockCells(cellArray) {
                 cpuHitList[x][y + 1] = true;
             }
         }
-        if (x + 1 >= 0) {
+        if (x + 1 < 10) {
             if (y - 1 >= 0) cpuHitList[x + 1][y - 1] = true;
             cpuHitList[x + 1][y] = true;
             if (y + 1 < 10) cpuHitList[x + 1][y + 1] = true;

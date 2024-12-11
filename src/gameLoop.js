@@ -405,6 +405,7 @@ async function startGame(shipsPlaced, initialisationHTML) {
     }
 
     function playCPU() {
+        if (playerShipsRemaining == 0) return;
         const img = document.createElement('img');
         let [x, y] = bestMove();
         if (playerGameBoard[x][y] >= 1) {

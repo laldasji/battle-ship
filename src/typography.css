@@ -69,64 +69,61 @@ span b,
 	}
 
 
-h1, .title-1 ,h2, .title-2 ,h3, .title-3 ,h4, .title-4 ,h5, .title-5 ,h6, .title-6  {
-		font-style: normal;
-		text-transform: uppercase;
-	}
+h1, h2, h3, h4, h5, h6 {
+    font-style: normal;
+    text-transform: uppercase;
+}
 
-	p,
-
-
-h1, .title-1 {
+h1 {
     font-size: 38px;
     line-height: 40px;
     font-weight: 400;
     letter-spacing: -0.003em;
 }
 
-h2, .title-2 {
+h2 {
     font-size: 32px;
     line-height: 40px;
     font-weight: 400;
     letter-spacing: -0.002em;
 }
 
-h3, .title-3 {
+h3 {
     font-size: 28px;
     line-height: 36px;
     font-weight: 400;
     letter-spacing: -0.001em;
 }
 
-h4, .title-4 {
+h4 {
     font-size: 24px;
     line-height: 36px;
     font-weight: 400;
     letter-spacing: -0.001em;
 }
 
-h5, .title-5 {
+h5 {
     font-size: 22px;
     line-height: 36px;
     font-weight: 400;
     letter-spacing: 0em;
 }
 
-h6, .title-6 {
+h6 {
     font-size: 18px;
     line-height: 32px;
     font-weight: 400;
     letter-spacing: 0em;
 }
 
-p, button, .body-1 {
+p, button {
     font-size: 14px;
     line-height: 20px;
     font-weight: 400;
     letter-spacing: 0.001em;
 }
 
-label, figcaption, input, .body-2 {
+label, figcaption, input {
     font-size: 12px;
     line-height: 20px;
     font-weight: 400;
@@ -141,47 +138,45 @@ label, figcaption, input, .body-2 {
 }
 
     
-    @media (min-width: 768px) {
-		body {
-			font-size: 16px;
-		}
-
-        h1, .title-1 {
-            font-size: 76px;
-            line-height: 84px;
-        }
-        h2, .title-2 {
-            font-size: 62px;
-            line-height: 76px;
-        }
-        h3, .title-3 {
-            font-size: 48px;
-            line-height: 64px;
-        }
-        h4, .title-4 {
-            font-size: 40px;
-            line-height: 60px;
-        }
-        h5, .title-5 {
-            font-size: 32px;
-            line-height: 52px;
-        }
-        h6, .title-6 {
-            font-size: 26px;
-            line-height: 48px;
-        }
-        p, button, .body-1 {
-            font-size: 16px;
-            line-height: 24px;
-        }
-        label, figcaption, input, .body-2 {
-            font-size: 12px;
-            line-height: 20px;
-        }
-        .tooltip {
-            font-size: 10px;
-            line-height: 16px;
-        }
-        
-
+@media (min-width: 768px) {
+    body {
+        font-size: 16px;
     }
+
+    h1 {
+        font-size: 76px;
+        line-height: 84px;
+    }
+    h2 {
+        font-size: 62px;
+        line-height: 76px;
+    }
+    h3 {
+        font-size: 48px;
+        line-height: 64px;
+    }
+    h4 {
+        font-size: 40px;
+        line-height: 60px;
+    }
+    h5 {
+        font-size: 32px;
+        line-height: 52px;
+    }
+    h6 {
+        font-size: 26px;
+        line-height: 48px;
+    }
+    p, button {
+        font-size: 16px;
+        line-height: 24px;
+    }
+    label, figcaption, input {
+        font-size: 12px;
+        line-height: 20px;
+    }
+    .tooltip {
+        font-size: 10px;
+        line-height: 16px;
+    }
+}

@@ -200,11 +200,38 @@ function initialiseMap() {
     startGame.addEventListener('click', () => {
         if (shipsPlaced.length == 5) {
             document.removeEventListener('keydown', handleRotation);
-            setTimeout(() => {gameloop(shipsPlaced, initialisationHTML)}, 1000);
+            startGame.style.pointerEvents = 'none';
+            setTimeout(() => {gameloop(shipsPlaced, initialisationHTML)}, 500);
         }
     })
 
     document.addEventListener('keydown', handleRotation);
+}
+
+function zoomAdjustAlert() {
+    const alertBackground = document.createElement('div');
+    const body = document.querySelector('body');
+    const alertMessage = document.createElement('div');
+    const message = document.createElement('h4');
+    const closeAlert = document.createElement('button');
+    // body.style.opacity = 0.5;
+
+    alertMessage.classList.add('initialAlert');
+    alertBackground.classList.add('alertBackground');
+    message.textContent = 'Please adjust your zoom levels and press F11 for a better experience';
+
+    closeAlert.textContent = 'Okay';
+    closeAlert.addEventListener('click', () => {
+        alertBackground.classList.add('easeOut');
+        setTimeout(() => {
+            body.removeChild(alertBackground);
+        }, 900);
+    })
+
+    alertMessage.appendChild(message);
+    alertMessage.appendChild(closeAlert);
+    alertBackground.appendChild(alertMessage);
+    body.append(alertBackground);
 }
 
 export default initialiseMap;
@@ -263,5 +290,7 @@ let temp = [
 ];
 
 // gameloop(temp, initialisationHTML);
+
+zoomAdjustAlert();
 
 initialiseMap();

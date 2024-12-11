@@ -16,44 +16,43 @@ const ShipsTemplate = {
     Carrier: new Ship(5, 'Carrier')
 }
 
-function isValid(currentShipDetails, currentCell, alignment, gameBoard) {
+function isValid(currentShipDetails, currentCell, alignment, board) {
     if (currentCell[0] == -1) return false;
 
+    let x = currentCell[0], y = currentCell[1];
+    let length = currentShipDetails.length;
+
     if (alignment == 0) {
-        if ((currentCell[0] - 1 >= 0 && currentCell[1] - 1 >= 0) && gameBoard[currentCell[0] - 1][currentCell[1] - 1] >= 1)
+        if ((x - 1 >= 0 && y - 1 >= 0) && board[x - 1][y - 1] >= 1)
             return false;
-        if ((currentCell[0] + 1 <= 9 && currentCell[1] - 1 >= 0) && gameBoard[currentCell[0] + 1][currentCell[1] - 1] >= 1)
+        if ((x + 1 <= 9 && y - 1 >= 0) && board[x + 1][y - 1] >= 1)
             return false;
-        if ((currentCell[0] - 1 >= 0 && currentCell[1] + currentShipDetails.length <= 9) && gameBoard[currentCell[0] - 1][currentCell[1] + currentShipDetails.length] >= 1)
+        if ((x - 1 >= 0 && y + length <= 9) && board[x - 1][y + length] >= 1)
             return false;
-        if ((currentCell[0] + 1 <= 9 && currentCell[1] + currentShipDetails.length <= 9) && gameBoard[currentCell[0] + 1][currentCell[1] + currentShipDetails.length] >= 1)
+        if ((x + 1 <= 9 && y + length <= 9) && board[x + 1][y + length] >= 1)
             return false;
-        if ((currentCell[1] - 1 >= 0 && gameBoard[currentCell[0]][currentCell[1] - 1] >= 1)
-            || (currentCell[1] + currentShipDetails.length <= 9 && gameBoard[currentCell[0]][currentCell[1] + currentShipDetails.length] >= 1))
+        if ((y - 1 >= 0 && board[x][y - 1] >= 1) || (y + length <= 9 && board[x][y + length] >= 1))
+            return false;
+        for (let i = 0; i < length; i++) {
+            if (y + i > 9 || board[x][y + i] >= 1) return false;
+            if ((x - 1 >= 0 && board[x - 1][y + i] >= 1) || (x + 1 <= 9 && board[x + 1][y + i] >= 1))
                 return false;
-        for (let i = 0; i < currentShipDetails.length; i++) {
-            if (currentCell[1] + i > 9 || gameBoard[currentCell[0]][currentCell[1] + i] >= 1) return false;
-            if ((currentCell[0] - 1 >= 0 && gameBoard[currentCell[0] - 1][currentCell[1] + i] >= 1)
-                || (currentCell[0] + 1 <= 9 && gameBoard[currentCell[0] + 1][currentCell[1] + i] >= 1))
-                    return false;
         }
     } else {
-        if ((currentCell[0] - 1 >= 0 && currentCell[1] - 1 >= 0) && gameBoard[currentCell[0] - 1][currentCell[1] - 1] >= 1)
+        if ((x - 1 >= 0 && y - 1 >= 0) && board[x - 1][y - 1] >= 1)
             return false;
-        if ((currentCell[0] - 1 >= 0 && currentCell[1] + 1 <= 9) && gameBoard[currentCell[0] - 1][currentCell[1] + 1] >= 1)
+        if ((x - 1 >= 0 && y + 1 <= 9) && board[x - 1][y + 1] >= 1)
             return false;
-        if ((currentCell[0] + currentShipDetails.length <= 9 && currentCell[1] - 1 >= 0) && gameBoard[currentCell[0] + currentShipDetails.length][currentCell[1] - 1] >= 1)
+        if ((x + length <= 9 && y - 1 >= 0) && board[x + length][y - 1] >= 1)
             return false;
-        if ((currentCell[0] + currentShipDetails.length <= 9 && currentCell[1] + 1 <= 9) && gameBoard[currentCell[0] + currentShipDetails.length][currentCell[1] + 1] >= 1)
+        if ((x + length <= 9 && y + 1 <= 9) && board[x + length][y + 1] >= 1)
             return false;
-        if ((currentCell[0] - 1 >= 0 && gameBoard[currentCell[0] - 1][currentCell[1]] >= 1)
-            || (currentCell[0] + currentShipDetails.length <= 9 && gameBoard[currentCell[0] + currentShipDetails.length][currentCell[1]] >= 1))
+        if ((x - 1 >= 0 && board[x - 1][y] >= 1) || (x + length <= 9 && board[x + length][y] >= 1))
+            return false;
+        for (let i = 0; i < length; i++) {
+            if (x + i > 9 || board[x + i][y] >= 1) return false;
+            if ((y - 1 >= 0 && board[x + i][y - 1] >= 1) || (y + 1 <= 9 && board[x + i][y + 1] >= 1))
                 return false;
-        for (let i = 0; i < currentShipDetails.length; i++) {
-            if (currentCell[0] + i > 9 || gameBoard[currentCell[0] + i][currentCell[1]] >= 1) return false;
-            if ((currentCell[1] - 1 >= 0 && gameBoard[currentCell[0] + i][currentCell[1] - 1] >= 1)
-                || (currentCell[1] + 1 <= 9 && gameBoard[currentCell[0] + i][currentCell[1] + 1] >= 1))
-                    return false;
         }
     }
     return true;
