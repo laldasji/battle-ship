@@ -322,7 +322,6 @@ async function startGame(shipsPlaced, initialisationHTML) {
 
     const versusArea = document.querySelector('#versusArea');
 
-
     const invisibleElement = [
         document.querySelector('#gameTitle'),
         document.querySelector('#versusArea'),
@@ -351,13 +350,11 @@ async function startGame(shipsPlaced, initialisationHTML) {
     }
 
     function endGame(message) {
-        alert.classList.add('easeIn');
-        alert.style = '';
-
         const alertMessage = document.createElement('h1');
         alertMessage.textContent = message;
         alert.innerHTML = '';
         alert.appendChild(alertMessage);
+        
         const newGame = document.createElement('button');
         newGame.classList.add('newGame');
         newGame.textContent = 'New Game';
@@ -366,6 +363,9 @@ async function startGame(shipsPlaced, initialisationHTML) {
             initialiseMap();
         });
         alert.appendChild(newGame);
+
+        alert.classList.add('easeIn');
+        alert.style = '';
 
         setTimeout(alert.classList.remove('easeIn'), 1000);
     }
@@ -436,6 +436,7 @@ async function startGame(shipsPlaced, initialisationHTML) {
             img.src = cross;
             missTarget.currentTime = 0;
             missTarget.play();
+            versusArea.style = '';
         }
 
         const thisCell = playerMap[x * 10 + y];
@@ -488,8 +489,7 @@ async function startGame(shipsPlaced, initialisationHTML) {
                 missTarget.play();
                 setTimeout(() =>  {
                     playCPU();
-                    versusArea.style = '';
-            }, 1000);
+                }, 1000);
             }
             cell.appendChild(img);
             cell.classList.add('unclickable');
