@@ -17,7 +17,7 @@ function getRandomInt(a, b) {
     return Math.floor(Math.random() * (b - a + 1)) + a;
 }
 
-function generateCPUMap() {
+async function generateCPUMap() {
     // let Ships = ShipsTemplate;
     let Ships = JSON.parse(JSON.stringify(ShipsTemplate));
 
@@ -30,12 +30,33 @@ function generateCPUMap() {
         const upperLimit = 9 - Ships[ship].length + 1;
         let cell = [-1, -1];
 
+        let randomChecks = 0;
+        let iterativeX = 0;
+        let iterativeY = 0;
         while (true) {
             let tempCell = [-1, -1];
-            if (alignment == 0) {
-                tempCell = [getRandomInt(0, 9), getRandomInt(0, upperLimit)];
+            if (randomChecks < 25) {
+                if (alignment == 0) {
+                    tempCell = [getRandomInt(0, 9), getRandomInt(0, upperLimit)];
+                } else {
+                    tempCell = [getRandomInt(0, upperLimit), getRandomInt(0, 9)];
+                }
+                randomChecks++;
             } else {
-                tempCell = [getRandomInt(0, upperLimit), getRandomInt(0, 9)];
+                if (alignment == 0) {
+                    iterativeY++;
+                    if (iterativeY > 9 - Ships[ship].length + 1) {
+                        iterativeX++;
+                        iterativeY = 0;
+                    }
+                } else {
+                    iterativeX++;
+                    if (iterativeX > 9 - Ships[ship].length + 1) {
+                        iterativeY++;
+                        iterativeX = 0;
+                    }
+                }
+                tempCell = [iterativeX, iterativeY];
             }
             if (isValid(ship, tempCell, alignment, CPUGameBoard)) {
                 // fill up CPUGameBoard
@@ -77,6 +98,12 @@ function updateShipsRemaining(isPlayer, shipsRemaining) {
 
 async function startGame(shipsPlaced, initialisationHTML) {
     body.innerHTML = `
+    <div class="loadingScreen easeIn">
+        <div>
+            <h1>Loading...</h1>
+            <div class="lds-dual-ring"></div>
+        </div>
+    </div>
     <div id="alert" style="display: none;"></div>
     <h2 id="gameTitle">-BATTLESHIP!-</h2>
     <div id="versusArea">
@@ -293,6 +320,17 @@ async function startGame(shipsPlaced, initialisationHTML) {
     const playerMap = document.querySelectorAll('.playerCell');
     let playerGameBoard = Array.from({ length: 10 }, () => Array(10).fill(-1));
 
+    const versusArea = document.querySelector('#versusArea');
+
+
+    const invisibleElement = [
+        document.querySelector('#gameTitle'),
+        document.querySelector('#versusArea'),
+        document.querySelector('#scoreCard')
+    ];
+
+    for (let i = 0; i < 3; i++) invisibleElement[i].style.display = 'none';
+
     const alert = document.querySelector('#alert');
 
     function giveAlert(message) {
@@ -321,6 +359,7 @@ async function startGame(shipsPlaced, initialisationHTML) {
         alert.innerHTML = '';
         alert.appendChild(alertMessage);
         const newGame = document.createElement('button');
+        newGame.classList.add('newGame');
         newGame.textContent = 'New Game';
         newGame.addEventListener('click', () => {
             body.innerHTML = initialisationHTML;
@@ -389,7 +428,9 @@ async function startGame(shipsPlaced, initialisationHTML) {
                 }
             }
             playerGameBoard[x][y] = -1;
-            setTimeout(playCPU(), 1000);
+            setTimeout(() => {
+                playCPU()
+            }, 1000);
         } else {
             setPreviousHit(false);
             img.src = cross;
@@ -442,9 +483,13 @@ async function startGame(shipsPlaced, initialisationHTML) {
 
             } else {
                 img.src = cross;
+                versusArea.style.pointerEvents = 'none';                
                 missTarget.currentTime = 0;
                 missTarget.play();
-                setTimeout(playCPU(), 1000);
+                setTimeout(() =>  {
+                    playCPU();
+                    versusArea.style = '';
+            }, 1000);
             }
             cell.appendChild(img);
             cell.classList.add('unclickable');
@@ -453,7 +498,14 @@ async function startGame(shipsPlaced, initialisationHTML) {
 
     // randomly generate state for CPU
     const { CPUShipsPlaced, CPUGameBoard } = await generateCPUMap();
-    console.log(CPUGameBoard);
+    setTimeout(() => {
+        for (let i = 0; i < 3; i++) invisibleElement[i].style = '';
+        const loadingScreen = document.querySelector('.loadingScreen');
+        loadingScreen.classList.add('easeOut');
+        setTimeout(() => {
+            body.removeChild(loadingScreen)
+        }, 1010);
+    }, 1500);
 }
 
 export { startGame as gameloop};

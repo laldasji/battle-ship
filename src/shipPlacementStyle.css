@@ -145,25 +145,26 @@ body {
     }
 }
 
+button {
+    position: relative;
+    padding: 1em;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    background-color: white;
+    box-shadow: 0.4rem 0.4rem 0 black;
+}
+button:active {
+    top: 0.3rem;
+    left: 0.3rem;
+    box-shadow: 0.2rem 0.2rem 0 black;
+}
+
 #commandArea {
     background-color: var(--dark-red);
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     place-items: center;
-    button {
-        position: relative;
-        padding: 1em;
-        font-size: 1.5rem;
-        border: none;
-        border-radius: 0.5rem;
-        background-color: white;
-        box-shadow: 0.4rem 0.4rem 0 black;
-    }
-    button:active {
-        top: 0.3rem;
-        left: 0.3rem;
-        box-shadow: 0.2rem 0.2rem 0 black;
-    }
     .unclickable {
         pointer-events: none;
         opacity: 0.5;

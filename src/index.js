@@ -200,8 +200,7 @@ function initialiseMap() {
     startGame.addEventListener('click', () => {
         if (shipsPlaced.length == 5) {
             document.removeEventListener('keydown', handleRotation);
-            console.log(shipsPlaced)
-            setTimeout(() => {gameloop(shipsPlaced, initialisationHTML)}, 500);
+            setTimeout(() => {gameloop(shipsPlaced, initialisationHTML)}, 1000);
         }
     })
 
@@ -261,6 +260,8 @@ let temp = [
         ],
         "alignment": 0
     }
-]
+];
+
+// gameloop(temp, initialisationHTML);
 
 initialiseMap();
